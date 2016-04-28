@@ -1,20 +1,29 @@
 
 	<div id="page-content-wrapper">
 		<div class="container-fluid">
-			<div class="row">
+			<div class="row form-group">
 				<div class="col-lg-12">
 					<h1>Jugadores</h1>
 				</div>
 				<div class="col-lg-12">
 					<a id="btnAgregarJugador" class="btn btn-default" data-toggle="modal" data-target="#dlgAgregarJugador"><i class="fa fa-plus"></i> Agregar Jugador</a>
 				</div>
+				<!--<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>-->
+			</div>
+			<div class="row">
 				<div class="col-lg-12">
 					<table id="tblJugadores" class="table table-striped table-bordered table-hover">
-						<thead></thead>
+						<thead>
+							<tr>
+								<th></th>
+								<th>T.O.R.</th>
+								<th>Nombre</th>
+								<th>Apellidos</th>
+							</tr>
+						</thead>
 						<tbody></tbody>
 					</table>
 				</div>
-				<!--<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>-->
 			</div>
 		</div>
 	</div>
@@ -62,7 +71,8 @@
 	$(document).ready(function(){
 
 		var oJugador = {};
-		
+		var table;
+
 		$("#menu-toggle").click(function(e) {
 			e.preventDefault();
 			$("#wrapper").toggleClass("toggled");
@@ -72,12 +82,16 @@
 			guardarJugador();
 		});
 
+		$("#btnAgregarJugador").click(function(e) {
+			clearInput();
+		});
+
 		var clearInput = function(){
 			$(":input").val('');
 		};
 
 		var guardarJugador = function(){
-			
+
 			oJugador = {
 				sTor: 		$("#txtTor").val(),
 				sNombre: 	$("#txtNombre").val(),
@@ -106,21 +120,83 @@
 		};
 
 		var listarJugadores = function(){
-
-			$.ajax({
-				url: "<?php echo base_url().'jugador/listarJugadores'; ?>",
-				type: 'POST',
-				dataType: 'json'
-			})
-			.done(function(json){
-				$data = jQuery.parseJSON(json);
-				console.log($data);
-			})
-			.fail(function(jqXHR, textStatus, errorThrown) {
-				//destroyLoading('body');
+			table = $('#tblJugadores').DataTable( {
+				"processing": true,
+				"serverSide": true,
+				"ajax": {
+					"url": "<?php echo base_url().'jugador/listarJugadores'; ?>",
+					"type": "POST"
+				},
+				"columns": [
+					{
+						"className":      'details-control',
+						"orderable":      false,
+						"data":           null,
+						"defaultContent": ''
+					},
+					{ "data": "jug_tor" },
+					{ "data": "jug_nombre" },
+					{ "data": "jug_apellidos" }
+				],
+				"order": [[ 1, "asc" ]],
+				"iDisplayLength": 25,
+				"language": {
+					"sProcessing":		"Procesando...",
+					"sLengthMenu":		"Mostrar _MENU_ registros",
+					"sZeroRecords":		"No se encontraron resultados",
+					"sEmptyTable": 		"Ningún dato disponible en esta tabla",
+					"sInfo":       		"Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+					"sInfoEmpty":  		"Mostrando registros del 0 al 0 de un total de 0 registros",
+					"sInfoFiltered":	"(filtrado de un total de _MAX_ registros)",
+					"sInfoPostFix":		"",
+					"sSearch":     		"Buscar:",
+					"sUrl":        		"",
+					"sInfoThousands":  	",",
+					"sLoadingRecords": 	"Cargando...",
+					"oPaginate": {
+						"sFirst":		"Primero",
+						"sLast": 		"Último",
+						"sNext": 		"Siguiente",
+						"sPrevious": 	"Anterior"
+					},
+					"oAria": {
+						"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+						"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+					}
+				}
 			});
 		};
-		
+
+		$('#tblJugadores tbody').on('click', 'td.details-control', function () {
+			var tr = $(this).closest('tr');
+			var row = table.row(tr);
+			var sCodTor = row.data().jug_tor;
+			
+			bootbox.confirm("¿Desea eliminar jugador?", function(result) {
+				if(result){
+					$.ajax({
+						url: "<?php echo base_url().'jugador/eliminarJugador'; ?>",
+						type: 'POST',
+						dataType: 'json',
+						data: {
+							"sTor": sCodTor
+						}
+					})
+					.done(function(json){
+						//destroyLoading('body');
+						if (json == 1) {
+							bootbox.alert("Jugador eliminado.");
+						}else{
+							bootbox.alert("Error al eliminar jugador.");
+						}
+					})
+					.fail(function(jqXHR, textStatus, errorThrown) {
+						//destroyLoading('body');
+					});
+				}
+			}); 
+		});
+
 		listarJugadores();
 	});
 

@@ -10,6 +10,7 @@
 		<link rel="stylesheet" href="<?php echo base_url()?>general/css/bootstrap.min.css">
 		<link rel="stylesheet" href="<?php echo base_url()?>general/css/font-awesome.min.css">
 		<link rel="stylesheet" href="<?php echo base_url()?>general/css/datatables.min.css">
+		<link rel="stylesheet" href="<?php echo base_url()?>general/css/tor.css">
 		
 		<!-- Custom CSS -->
     	<link rel="stylesheet" href="<?php echo base_url()?>general/css/simple-sidebar.css">

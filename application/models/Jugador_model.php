@@ -19,5 +19,9 @@
 			}
 		}
 
+		public function eliminarJugador($aEntData){
+			$this->db->delete('jugador', array('jug_tor' => $aEntData['jug_tor']));
+			return $this->db->affected_rows();
+		}
 	}
 ?>
